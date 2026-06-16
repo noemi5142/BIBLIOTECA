@@ -19,6 +19,11 @@ public class NotificacionController {
         return service.crear(notificacion);
     }
 
+    @GetMapping
+    public ResponseEntity<?> listar() {
+        return service.listar();
+    }
+
     @GetMapping("/usuario/{usuarioId}")
     public List<Notificacion> porUsuario(@PathVariable String usuarioId) {
         return service.listarPorUsuario(usuarioId);
@@ -27,5 +32,15 @@ public class NotificacionController {
     @GetMapping("/{id}")
     public ResponseEntity<?> obtener(@PathVariable String id) {
         return service.obtenerPorId(id);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@PathVariable String id, @Valid @RequestBody Notificacion notificacion) {
+        return service.actualizar(id, notificacion);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable String id) {
+        return service.eliminar(id);
     }
 }

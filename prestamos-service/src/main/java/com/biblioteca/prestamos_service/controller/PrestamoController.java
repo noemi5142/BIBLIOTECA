@@ -18,8 +18,23 @@ public class PrestamoController {
         return service.crear(prestamo);
     }
 
+    @GetMapping
+    public ResponseEntity<?> listar() {
+        return service.listarPrestamos(); 
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> obtener(@PathVariable Long id) {
         return service.obtenerPorId(id);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody Prestamo prestamo) {
+        return service.actualizar(id, prestamo);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        return service.eliminar(id);
     }
 }

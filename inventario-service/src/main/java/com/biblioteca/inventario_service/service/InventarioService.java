@@ -39,4 +39,34 @@ public class InventarioService {
             .orElseThrow(() -> new RecursoNoEncontradoException("Item de inventario no encontrado"));
         return ResponseEntity.ok(item);
     }
+
+    public ResponseEntity<?> listar() {
+        List<Inventario> todos = repo.findAll();
+        return ResponseEntity.ok(todos);
+    }
+
+    public ResponseEntity<?> actualizar(Long id, Inventario inventario) {
+        Long idNoNulo = Objects.requireNonNull(id, "El id del item de inventario no puede ser nulo");
+        Inventario itemExistente = repo.findById(idNoNulo)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Item de inventario no encontrado"));
+
+        if (inventario.getEstado() != null) {
+            itemExistente.setEstado(inventario.getEstado());
+        }
+        if (inventario.getUbicacion() != null && !inventario.getUbicacion().isEmpty()) {
+            itemExistente.setUbicacion(inventario.getUbicacion());
+        }
+
+        Inventario actualizado = repo.save(itemExistente);
+        return ResponseEntity.ok(actualizado);
+    }
+
+    public ResponseEntity<?> eliminar(Long id) {
+        Long idNoNulo = Objects.requireNonNull(id, "El id del item de inventario no puede ser nulo");
+        if (!repo.existsById(idNoNulo)) {
+            throw new RecursoNoEncontradoException("Item de inventario no encontrado");
+        }
+        repo.deleteById(idNoNulo);
+        return ResponseEntity.ok("Item de inventario eliminado exitosamente");
+    }
 }

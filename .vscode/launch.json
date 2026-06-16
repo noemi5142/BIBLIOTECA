@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "UsuariosServiceApplication",
+            "request": "launch",
+            "mainClass": "com.biblioteca.usuarios_service.UsuariosServiceApplication",
+            "projectName": "usuarios-service"
+        },
+        {
+            "type": "java",
+            "name": "InventarioServiceApplication",
+            "request": "launch",
+            "mainClass": "com.biblioteca.inventario_service.InventarioServiceApplication",
+            "projectName": "inventario-service"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-LibrosServiceApplication<libros-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.biblioteca.libros_service.LibrosServiceApplication",
+            "projectName": "libros-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

@@ -19,6 +19,11 @@ public class InventarioController {
         return service.crear(item);
     }
 
+    @GetMapping
+    public ResponseEntity<?> listar() {
+        return service.listar();
+    }
+
     @GetMapping("/libro/{libroId}")
     public List<Inventario> disponibles(@PathVariable String libroId) {
         return service.listarDisponiblesPorLibro(libroId);
@@ -27,5 +32,15 @@ public class InventarioController {
     @GetMapping("/{id}")
     public ResponseEntity<?> obtener(@PathVariable Long id) {
         return service.obtenerPorId(id);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody Inventario inventario) {
+        return service.actualizar(id, inventario);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        return service.eliminar(id);
     }
 }

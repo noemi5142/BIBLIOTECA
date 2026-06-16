@@ -37,4 +37,34 @@ public class NotificacionService {
             .orElseThrow(() -> new RecursoNoEncontradoException("Notificación no encontrada con ID: " + idNoNulo));
         return ResponseEntity.ok(notif);
     }
+
+    public ResponseEntity<?> listar() {
+        List<Notificacion> todas = repo.findAll();
+        return ResponseEntity.ok(todas);
+    }
+
+    public ResponseEntity<?> actualizar(String id, Notificacion notificacion) {
+        String idNoNulo = Objects.requireNonNull(id, "El id de la notificación no puede ser nulo");
+        Notificacion notifExistente = repo.findById(idNoNulo)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Notificación no encontrada con ID: " + idNoNulo));
+
+        if (notificacion.getMensaje() != null && !notificacion.getMensaje().isEmpty()) {
+            notifExistente.setMensaje(notificacion.getMensaje());
+        }
+        if (notificacion.isLeida() != notifExistente.isLeida()) {
+            notifExistente.setLeida(notificacion.isLeida());
+        }
+
+        Notificacion actualizada = repo.save(notifExistente);
+        return ResponseEntity.ok(actualizada);
+    }
+
+    public ResponseEntity<?> eliminar(String id) {
+        String idNoNulo = Objects.requireNonNull(id, "El id de la notificación no puede ser nulo");
+        if (!repo.existsById(idNoNulo)) {
+            throw new RecursoNoEncontradoException("Notificación no encontrada con ID: " + idNoNulo);
+        }
+        repo.deleteById(idNoNulo);
+        return ResponseEntity.ok("Notificación eliminada exitosamente");
+    }
 }

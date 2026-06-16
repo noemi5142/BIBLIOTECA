@@ -31,4 +31,29 @@ public class CategoriaService {
             .orElseThrow(() -> new RecursoNoEncontradoException("Categoría no encontrada con ID: " + idNoNulo));
         return ResponseEntity.ok(categoria);
     }
+
+    public ResponseEntity<?> actualizar(String id, Categoria categoria) {
+        String idNoNulo = Objects.requireNonNull(id, "El id de la categoría no puede ser nulo");
+        Categoria categoriaExistente = repo.findById(idNoNulo)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Categoría no encontrada con ID: " + idNoNulo));
+        
+        if (categoria.getNombre() != null && !categoria.getNombre().isEmpty()) {
+            categoriaExistente.setNombre(categoria.getNombre());
+        }
+        if (categoria.getDescripcion() != null && !categoria.getDescripcion().isEmpty()) {
+            categoriaExistente.setDescripcion(categoria.getDescripcion());
+        }
+        
+        Categoria actualizada = repo.save(categoriaExistente);
+        return ResponseEntity.ok(actualizada);
+    }
+
+    public ResponseEntity<?> eliminar(String id) {
+        String idNoNulo = Objects.requireNonNull(id, "El id de la categoría no puede ser nulo");
+        if (!repo.existsById(idNoNulo)) {
+            throw new RecursoNoEncontradoException("Categoría no encontrada con ID: " + idNoNulo);
+        }
+        repo.deleteById(idNoNulo);
+        return ResponseEntity.ok("Categoría eliminada exitosamente");
+    }
 }

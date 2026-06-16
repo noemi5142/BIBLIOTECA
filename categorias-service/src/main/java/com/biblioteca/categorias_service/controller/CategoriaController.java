@@ -28,4 +28,14 @@ public class CategoriaController {
     public ResponseEntity<?> obtener(@PathVariable String id) {
         return service.obtenerPorId(id);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@PathVariable String id, @Valid @RequestBody Categoria categoria) {
+        return service.actualizar(id, categoria);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable String id) {
+        return service.eliminar(id);
+    }
 }

@@ -14,10 +14,15 @@ import java.util.Objects;
 
 @Service
 public class PrestamoService {
+
+    @Autowired
+    private PrestamoRepository repo;
+
+    @Autowired
+    private UsuarioClient usuarioClient;
     
-    @Autowired private PrestamoRepository repo;
-    @Autowired private UsuarioClient usuarioClient;
-    @Autowired private InventarioClient inventarioClient;
+    @Autowired
+    private InventarioClient inventarioClient;
 
     public ResponseEntity<?> crear(Prestamo prestamo) {
         try {
@@ -44,7 +49,7 @@ public class PrestamoService {
         } catch (FeignException e) {
             // Captura fallos de red o servicios caídos (Clase 11)
             return ResponseEntity.status(e.status()).body("Error conectando con servicios externos");
-            
+
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
         }
@@ -54,7 +59,36 @@ public class PrestamoService {
         Long idNoNulo = Objects.requireNonNull(id, "El id del préstamo no puede ser nulo");
 
         Prestamo prestamo = repo.findById(idNoNulo)
-            .orElseThrow(() -> new RecursoNoEncontradoException("Préstamo no encontrado con ID: " + idNoNulo));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Préstamo no encontrado con ID: " + idNoNulo));
         return ResponseEntity.ok(prestamo);
+    }
+
+    public ResponseEntity<?> listarPrestamos() {
+        return ResponseEntity.ok(repo.findAll());
+    }
+
+    public ResponseEntity<?> actualizar(Long id, Prestamo prestamo) {
+        Long idNoNulo = Objects.requireNonNull(id, "El id del préstamo no puede ser nulo");
+        Prestamo prestamoExistente = repo.findById(idNoNulo)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Préstamo no encontrado con ID: " + idNoNulo));
+
+        if (prestamo.getFechaPrestamo() != null) {
+            prestamoExistente.setFechaPrestamo(prestamo.getFechaPrestamo());
+        }
+        if (prestamo.isDevuelto() != prestamoExistente.isDevuelto()) {
+            prestamoExistente.setDevuelto(prestamo.isDevuelto());
+        }
+
+        Prestamo actualizado = repo.save(prestamoExistente);
+        return ResponseEntity.ok(actualizado);
+    }
+
+    public ResponseEntity<?> eliminar(Long id) {
+        Long idNoNulo = Objects.requireNonNull(id, "El id del préstamo no puede ser nulo");
+        if (!repo.existsById(idNoNulo)) {
+            throw new RecursoNoEncontradoException("Préstamo no encontrado con ID: " + idNoNulo);
+        }
+        repo.deleteById(idNoNulo);
+        return ResponseEntity.ok("Préstamo eliminado exitosamente");
     }
 }

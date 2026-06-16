@@ -1,0 +1,36 @@
+services:
+  # Base de datos MySQL para prestamos-service
+  mysql-prestamos:
+    image: mysql:8.4
+    container_name: mysql-prestamos
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: prestamos_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - prestamos-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Microservicio prestamos-service
+  prestamos-service:
+    build: ./prestamos-service
+    container_name: prestamos-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-prestamos:3306/prestamos_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+    depends_on:
+      mysql-prestamos:
+        condition: service_healthy
+    restart: on-failure
+
+volumes:
+  prestamos-data:

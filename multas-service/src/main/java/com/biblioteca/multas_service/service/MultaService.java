@@ -50,4 +50,37 @@ public class MultaService {
             .orElseThrow(() -> new RecursoNoEncontradoException("Multa no encontrada con ID: " + idNoNulo));
         return ResponseEntity.ok(multa);
     }
+
+    public ResponseEntity<?> listar() {
+        List<Multa> todas = repo.findAll();
+        return ResponseEntity.ok(todas);
+    }
+
+    public ResponseEntity<?> actualizar(Long id, Multa multa) {
+        Long idNoNulo = Objects.requireNonNull(id, "El id de la multa no puede ser nulo");
+        Multa multaExistente = repo.findById(idNoNulo)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Multa no encontrada con ID: " + idNoNulo));
+
+        if (multa.getMonto() != null) {
+            multaExistente.setMonto(multa.getMonto());
+        }
+        if (multa.isPagada() != multaExistente.isPagada()) {
+            multaExistente.setPagada(multa.isPagada());
+        }
+        if (multa.getRazon() != null && !multa.getRazon().isEmpty()) {
+            multaExistente.setRazon(multa.getRazon());
+        }
+
+        Multa actualizada = repo.save(multaExistente);
+        return ResponseEntity.ok(actualizada);
+    }
+
+    public ResponseEntity<?> eliminar(Long id) {
+        Long idNoNulo = Objects.requireNonNull(id, "El id de la multa no puede ser nulo");
+        if (!repo.existsById(idNoNulo)) {
+            throw new RecursoNoEncontradoException("Multa no encontrada con ID: " + idNoNulo);
+        }
+        repo.deleteById(idNoNulo);
+        return ResponseEntity.ok("Multa eliminada exitosamente");
+    }
 }

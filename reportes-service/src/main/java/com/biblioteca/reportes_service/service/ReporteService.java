@@ -16,7 +16,9 @@ import java.util.Map;
 public class ReporteService {
     
     @Autowired private ReporteRepository repo;
+
     @Autowired private PrestamoClient prestamoClient;
+    
     @Autowired private MultaClient multaClient;
 
     public ResponseEntity<?> generarReporte() {
@@ -46,5 +48,41 @@ public class ReporteService {
             .<ResponseEntity<?>>map(r -> ResponseEntity.ok(r))
             .orElseGet(() -> ResponseEntity.status(404)
                 .body((Object) Map.of("mensaje", "No hay reportes generados")));
+    }
+
+    public ResponseEntity<?> obtenerPorId(String id) {
+        return repo.findById(id)
+            .<ResponseEntity<?>>map(r -> ResponseEntity.ok(r))
+            .orElseGet(() -> ResponseEntity.status(404)
+                .body(Map.of("mensaje", "Reporte no encontrado con ID: " + id)));
+    }
+
+    public ResponseEntity<?> listar() {
+        List<ReporteConsolidado> todos = repo.findAll();
+        return ResponseEntity.ok(todos);
+    }
+
+    public ResponseEntity<?> actualizar(String id, ReporteConsolidado reporte) {
+        return repo.findById(id)
+            .map(reporteExistente -> {
+                if (reporte.getTotalPrestamosActivos() != 0) {
+                    reporteExistente.setTotalPrestamosActivos(reporte.getTotalPrestamosActivos());
+                }
+                if (reporte.getTotalMultasPendientes() != 0) {
+                    reporteExistente.setTotalMultasPendientes(reporte.getTotalMultasPendientes());
+                }
+                return repo.save(reporteExistente);
+            })
+            .<ResponseEntity<?>>map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.status(404)
+                .body(Map.of("mensaje", "Reporte no encontrado con ID: " + id)));
+    }
+
+    public ResponseEntity<?> eliminar(String id) {
+        if (!repo.existsById(id)) {
+            return ResponseEntity.status(404).body(Map.of("mensaje", "Reporte no encontrado con ID: " + id));
+        }
+        repo.deleteById(id);
+        return ResponseEntity.ok(Map.of("mensaje", "Reporte eliminado exitosamente"));
     }
 }

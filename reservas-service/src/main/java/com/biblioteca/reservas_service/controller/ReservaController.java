@@ -19,6 +19,11 @@ public class ReservaController {
         return service.crear(reserva);
     }
 
+    @GetMapping
+    public ResponseEntity<?> listar() {
+        return service.listar();
+    }
+
     @GetMapping("/usuario/{usuarioId}")
     public List<Reserva> porUsuario(@PathVariable String usuarioId) {
         return service.listarPorUsuario(usuarioId);
@@ -27,5 +32,15 @@ public class ReservaController {
     @GetMapping("/{id}")
     public ResponseEntity<?> obtener(@PathVariable String id) {
         return service.obtenerPorId(id);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@PathVariable String id, @Valid @RequestBody Reserva reserva) {
+        return service.actualizar(id, reserva);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable String id) {
+        return service.eliminar(id);
     }
 }

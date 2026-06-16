@@ -19,6 +19,11 @@ public class MultaController {
         return service.crear(multa);
     }
 
+    @GetMapping
+    public ResponseEntity<?> listar() {
+        return service.listar();
+    }
+
     @GetMapping("/prestamo/{prestamoId}")
     public List<Multa> porPrestamo(@PathVariable Long prestamoId) {
         return service.listarPorPrestamo(prestamoId);
@@ -27,5 +32,15 @@ public class MultaController {
     @GetMapping("/{id}")
     public ResponseEntity<?> obtener(@PathVariable Long id) {
         return service.obtenerPorId(id);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody Multa multa) {
+        return service.actualizar(id, multa);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        return service.eliminar(id);
     }
 }

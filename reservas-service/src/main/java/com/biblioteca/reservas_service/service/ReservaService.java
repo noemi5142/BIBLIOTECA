@@ -49,4 +49,34 @@ public class ReservaService {
             .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada con ID: " + idNoNulo));
         return ResponseEntity.ok(reserva);
     }
+
+    public ResponseEntity<?> listar() {
+        List<Reserva> todas = repo.findAll();
+        return ResponseEntity.ok(todas);
+    }
+
+    public ResponseEntity<?> actualizar(String id, Reserva reserva) {
+        String idNoNulo = Objects.requireNonNull(id, "El id de la reserva no puede ser nulo");
+        Reserva reservaExistente = repo.findById(idNoNulo)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada con ID: " + idNoNulo));
+
+        if (reserva.isActiva() != reservaExistente.isActiva()) {
+            reservaExistente.setActiva(reserva.isActiva());
+        }
+        if (reserva.getFechaSolicitud() != null) {
+            reservaExistente.setFechaSolicitud(reserva.getFechaSolicitud());
+        }
+
+        Reserva actualizada = repo.save(reservaExistente);
+        return ResponseEntity.ok(actualizada);
+    }
+
+    public ResponseEntity<?> eliminar(String id) {
+        String idNoNulo = Objects.requireNonNull(id, "El id de la reserva no puede ser nulo");
+        if (!repo.existsById(idNoNulo)) {
+            throw new RecursoNoEncontradoException("Reserva no encontrada con ID: " + idNoNulo);
+        }
+        repo.deleteById(idNoNulo);
+        return ResponseEntity.ok("Reserva eliminada exitosamente");
+    }
 }
