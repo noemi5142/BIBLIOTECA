@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "libros-service", url = "http://localhost:8081")
 public interface LibrosClient {
-    @GetMapping("/libros/{libroId}")
-    Object obtenerLibro(@PathVariable String libroId);
-    @GetMapping("/libros/disponibilidad/{libroId}")
-    object varificarDisponibilidadLibro(@PathVariable String libroId);
+    @GetMapping("/libros/{id}")
+    Object buscarLibroPorId(@PathVariable String id);
+   
 }
+
