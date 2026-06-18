@@ -4,8 +4,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "libros-service", url = "http://localhost:8085")
+@FeignClient(name = "libros-service", url = "http://localhost:8081")
 public interface LibrosClient {
-    @GetMapping("/libros/libro/{libroId}")
-    Object verificarDisponibilidad(@PathVariable String libroId);
+    @GetMapping("/libros/{libroId}")
+    Object obtenerLibro(@PathVariable String libroId);
+    @GetMapping("/libros/disponibilidad/{libroId}")
+    object varificarDisponibilidadLibro(@PathVariable String libroId);
 }
