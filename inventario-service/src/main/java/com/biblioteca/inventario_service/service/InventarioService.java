@@ -1,7 +1,6 @@
 package com.biblioteca.inventario_service.service;
 
 import com.biblioteca.inventario_service.exception.RecursoNoEncontradoException;
-import com.biblioteca.inventario_service.model.EstadoLibro;
 import com.biblioteca.inventario_service.model.Inventario;
 import com.biblioteca.inventario_service.repository.InventarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ public class InventarioService {
         Inventario itemNoNulo = Objects.requireNonNull(item, "El item de inventario no puede ser nulo");
         String codigoCopia = Objects.requireNonNull(itemNoNulo.getCodigoCopia(), "El código de copia no puede ser nulo");
 
-        // Validación de negocio: Código único
         if (repo.existsByCodigoCopia(codigoCopia)) {
             return ResponseEntity.badRequest().body("Error: Ya existe una copia con ese código");
         }
@@ -30,7 +28,7 @@ public class InventarioService {
     }
 
     public List<Inventario> listarDisponiblesPorLibro(String libroId) {
-        return repo.findByLibroIdAndEstado(libroId, EstadoLibro.DISPONIBLE);
+        return repo.findByLibroIdAndEstado(libroId, "DISPONIBLE");
     }
 
     public ResponseEntity<?> obtenerPorId(Long id) {

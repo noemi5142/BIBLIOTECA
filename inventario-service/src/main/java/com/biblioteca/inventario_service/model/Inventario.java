@@ -2,7 +2,6 @@ package com.biblioteca.inventario_service.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "inventario")
@@ -12,18 +11,17 @@ public class Inventario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Referencia lógica al libros-service (MongoDB)
     @NotBlank(message = "El ID del libro es obligatorio")
     private String libroId; 
 
     @NotBlank(message = "El código de copia es obligatorio")
-    private String codigoCopia; // Ej: "PRIN-001-A"
+    private String codigoCopia; 
 
-    @NotNull(message = "El estado es obligatorio")
-    @Enumerated(EnumType.STRING) // Guarda como texto en SQL
-    private EstadoLibro estado;
+    // ✅ CAMBIO AQUÍ: De EstadoLibro a String
+    @NotBlank(message = "El estado es obligatorio")
+    private String estado; 
 
-    private String ubicacion; // Ej: "Estante A2"
+    private String ubicacion; 
 
     public Inventario() {}
 
@@ -37,8 +35,9 @@ public class Inventario {
     public String getCodigoCopia() { return codigoCopia; }
     public void setCodigoCopia(String codigoCopia) { this.codigoCopia = codigoCopia; }
     
-    public EstadoLibro getEstado() { return estado; }
-    public void setEstado(EstadoLibro estado) { this.estado = estado; }
+    // ✅ CAMBIO AQUÍ: Getter y Setter como String
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
     
     public String getUbicacion() { return ubicacion; }
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
