@@ -2,6 +2,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "PrestamosServiceApplication",
+            "request": "launch",
+            "mainClass": "com.biblioteca.prestamos_service.PrestamosServiceApplication",
+            "projectName": "prestamos-service"
+        },
+        {
+            "type": "java",
+            "name": "AutoresServiceApplication",
+            "request": "launch",
+            "mainClass": "com.biblioteca.autores_service.AutoresServiceApplication",
+            "projectName": "autores-service"
+        },
+        {
+            "type": "java",
             "name": "UsuariosServiceApplication",
             "request": "launch",
             "mainClass": "com.biblioteca.usuarios_service.UsuariosServiceApplication",

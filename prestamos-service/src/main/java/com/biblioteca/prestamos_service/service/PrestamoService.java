@@ -47,8 +47,8 @@ public class PrestamoService {
             return ResponseEntity.status(201).body(guardado);
 
         } catch (FeignException e) {
-            // Captura fallos de red o servicios caídos (Clase 11)
-            return ResponseEntity.status(e.status()).body("Error conectando con servicios externos");
+            // ✅ CORREGIDO: Usar 503 en lugar de e.status()
+            return ResponseEntity.status(503).body("Error conectando con servicios externos: " + e.getMessage());
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error interno: " + e.getMessage());

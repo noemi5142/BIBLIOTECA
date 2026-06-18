@@ -4,10 +4,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "usuarios-service", url = "http://host.docker.internal:8082")
-public interface UsuarioClient {
+@FeignClient(name = "libros-service", url = "http://host.docker.internal:8081")
+public interface LibroClient {
     
-    @GetMapping("/usuarios/{id}")
-    Object buscarUsuario(@PathVariable String id);
+    @GetMapping("/libros/{id}")
+    Object buscarLibro(@PathVariable String id);
 }
-
