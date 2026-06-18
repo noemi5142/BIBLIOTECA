@@ -8,7 +8,6 @@ public interface InventarioRepository extends JpaRepository<Inventario, Long> {
     
     boolean existsByCodigoCopia(String codigoCopia);
     
-    // ✅ CAMBIO AQUÍ: El segundo parámetro ahora es String
     List<Inventario> findByLibroIdAndEstado(String libroId, String estado);
     
     List<Inventario> findByLibroId(String libroId);
