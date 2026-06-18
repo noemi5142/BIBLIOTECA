@@ -17,7 +17,7 @@ public class Inventario {
     @NotBlank(message = "El código de copia es obligatorio")
     private String codigoCopia; 
 
-    // ✅ CAMBIO AQUÍ: De EstadoLibro a String
+    // CAMBIO AQUÍ: De EstadoLibro a String
     @NotBlank(message = "El estado es obligatorio")
     private String estado; 
 
@@ -35,7 +35,7 @@ public class Inventario {
     public String getCodigoCopia() { return codigoCopia; }
     public void setCodigoCopia(String codigoCopia) { this.codigoCopia = codigoCopia; }
     
-    // ✅ CAMBIO AQUÍ: Getter y Setter como String
+    // CAMBIO AQUÍ: Getter y Setter como String
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
     
