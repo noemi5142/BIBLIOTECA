@@ -6,7 +6,9 @@ import com.biblioteca.autores_service.repository.AutorRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -18,35 +20,67 @@ public class AutorService {
         this.repo = Objects.requireNonNull(repo, "AutorRepository no puede ser null");
     }
 
-    public ResponseEntity<Autor> crearAutor(Autor autor) {
+    // POST: Crear autor
+    public ResponseEntity<?> crearAutor(Autor autor) {
         Autor guardado = repo.save(autor);
-        return ResponseEntity.status(201).body(guardado);
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Autor agregado exitosamente");
+        respuesta.put("autor", guardado);
+        
+        return ResponseEntity.status(201).body(respuesta);
     }
 
-    public ResponseEntity<List<Autor>> listarAutores() {
+    // GET: Listar todos
+    public ResponseEntity<?> listarAutores() {
         List<Autor> autores = repo.findAll();
-        return ResponseEntity.ok(autores);
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Lista de autores obtenida exitosamente");
+        respuesta.put("total", autores.size());
+        respuesta.put("autores", autores);
+        
+        return ResponseEntity.ok(respuesta);
     }
 
-    public ResponseEntity<Autor> buscarPorId(Long id) {
+    // GET: Buscar por ID
+    public ResponseEntity<?> buscarPorId(Long id) {
         Autor autor = obtenerAutorOExcepcion(id);
-        return ResponseEntity.ok(autor);
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Autor encontrado exitosamente");
+        respuesta.put("autor", autor);
+        
+        return ResponseEntity.ok(respuesta);
     }
 
-    public ResponseEntity<Autor> actualizarAutor(Long id, Autor autorActualizado) {
+    // PUT: Actualizar
+    public ResponseEntity<?> actualizarAutor(Long id, Autor autorActualizado) {
         Autor existente = obtenerAutorOExcepcion(id);
 
         existente.setNombre(autorActualizado.getNombre());
         existente.setNacionalidad(autorActualizado.getNacionalidad());
 
         Autor guardado = repo.save(existente);
-        return ResponseEntity.ok(guardado);
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Autor actualizado exitosamente");
+        respuesta.put("autor", guardado);
+        
+        return ResponseEntity.ok(respuesta);
     }
 
-    public ResponseEntity<String> eliminarAutor(Long id) {
+    // DELETE: Eliminar
+    public ResponseEntity<?> eliminarAutor(Long id) {
         Autor existente = obtenerAutorOExcepcion(id);
         repo.delete(existente);
-        return ResponseEntity.ok("Autor eliminado exitosamente");
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Autor eliminado exitosamente");
+        respuesta.put("idEliminado", id);
+        respuesta.put("nombreAutor", existente.getNombre());
+        
+        return ResponseEntity.ok(respuesta);
     }
 
     private Autor obtenerAutorOExcepcion(Long id) {

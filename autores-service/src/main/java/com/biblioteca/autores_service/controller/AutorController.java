@@ -6,8 +6,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/autores")
 public class AutorController {
@@ -20,31 +18,31 @@ public class AutorController {
 
     // POST: Crear autor
     @PostMapping
-    public ResponseEntity<Autor> crear(@Valid @RequestBody Autor autor) {
+    public ResponseEntity<?> crear(@Valid @RequestBody Autor autor) { // ✅ Cambiado a <?>
         return service.crearAutor(autor);
     }
 
     // GET: Listar todos
     @GetMapping
-    public ResponseEntity<List<Autor>> listar() {
+    public ResponseEntity<?> listar() { // ✅ Cambiado a <?>
         return service.listarAutores();
     }
 
     // GET: Buscar por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Autor> buscar(@PathVariable Long id) {
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id) { // ✅ Cambiado a <?>
         return service.buscarPorId(id);
     }
 
     // PUT: Actualizar
     @PutMapping("/{id}")
-    public ResponseEntity<Autor> actualizar(@PathVariable Long id, @Valid @RequestBody Autor autor) {
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody Autor autor) { // ✅ Cambiado a <?>
         return service.actualizarAutor(id, autor);
     }
 
     // DELETE: Eliminar
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+    public ResponseEntity<?> eliminar(@PathVariable Long id) { // ✅ Cambiado a <?>
         return service.eliminarAutor(id);
     }
 }

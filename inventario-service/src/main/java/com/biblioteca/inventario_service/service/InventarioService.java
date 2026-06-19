@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -24,7 +26,12 @@ public class InventarioService {
         }
         
         Inventario guardado = repo.save(itemNoNulo);
-        return ResponseEntity.status(201).body(guardado);
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Item de inventario agregado exitosamente");
+        respuesta.put("inventario", guardado);
+        
+        return ResponseEntity.status(201).body(respuesta);
     }
 
     public List<Inventario> listarDisponiblesPorLibro(String libroId) {
@@ -35,12 +42,23 @@ public class InventarioService {
         Long idNoNulo = Objects.requireNonNull(id, "El id del item de inventario no puede ser nulo");
         Inventario item = repo.findById(idNoNulo)
             .orElseThrow(() -> new RecursoNoEncontradoException("Item de inventario no encontrado"));
-        return ResponseEntity.ok(item);
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Item de inventario encontrado exitosamente");
+        respuesta.put("inventario", item);
+        
+        return ResponseEntity.ok(respuesta);
     }
 
     public ResponseEntity<?> listar() {
         List<Inventario> todos = repo.findAll();
-        return ResponseEntity.ok(todos);
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Lista de items de inventario obtenida exitosamente");
+        respuesta.put("total", todos.size());
+        respuesta.put("inventario", todos);
+        
+        return ResponseEntity.ok(respuesta);
     }
 
     public ResponseEntity<?> actualizar(Long id, Inventario inventario) {
@@ -56,7 +74,12 @@ public class InventarioService {
         }
 
         Inventario actualizado = repo.save(itemExistente);
-        return ResponseEntity.ok(actualizado);
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Item de inventario actualizado exitosamente");
+        respuesta.put("inventario", actualizado);
+        
+        return ResponseEntity.ok(respuesta);
     }
 
     public ResponseEntity<?> eliminar(Long id) {
@@ -65,6 +88,11 @@ public class InventarioService {
             throw new RecursoNoEncontradoException("Item de inventario no encontrado");
         }
         repo.deleteById(idNoNulo);
-        return ResponseEntity.ok("Item de inventario eliminado exitosamente");
+        
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Item de inventario eliminado exitosamente");
+        respuesta.put("idEliminado", idNoNulo);
+        
+        return ResponseEntity.ok(respuesta);
     }
 }
