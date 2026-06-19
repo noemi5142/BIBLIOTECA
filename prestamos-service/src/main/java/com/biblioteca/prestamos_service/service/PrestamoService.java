@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import feign.FeignException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,128 +22,114 @@ public class PrestamoService {
 
     @Autowired
     private UsuarioClient usuarioClient;
-    
+
     @Autowired
     private InventarioClient inventarioClient;
 
-public ResponseEntity<?> crear(Prestamo prestamo) {
-    try {
-        String usuarioId = Objects.requireNonNull(prestamo.getUsuarioId(), "El usuarioId es obligatorio");
-        String libroId = Objects.requireNonNull(prestamo.getLibroId(), "El libroId es obligatorio");
-
-        // 1. Validar usuario en usuarios-service
+    public ResponseEntity<?> crear(Prestamo prestamo) {
         try {
+            String usuarioId = Objects.requireNonNull(prestamo.getUsuarioId(), "El usuarioId es obligatorio");
+            String libroId = Objects.requireNonNull(prestamo.getLibroId(), "El libroId es obligatorio");
+
+            // Verificar que el usuario existe
             Object usuario = usuarioClient.buscarUsuario(usuarioId);
             if (usuario == null) {
-                return ResponseEntity.badRequest().body(
-                    Map.of("mensaje", "No existe un usuario con el ID proporcionado")
-                );
+                return ResponseEntity.badRequest().body("Error: El usuario no existe");
             }
-        } catch (FeignException.NotFound e) {
-            return ResponseEntity.badRequest().body(
-                Map.of("mensaje", "No existe un usuario con el ID proporcionado")
-            );
-        }
 
-        // 2. Validar stock en inventario-service
-        try {
-            Object inventario = inventarioClient.verificarDisponibilidad(libroId);
-            if (inventario == null || ((List<?>) inventario).isEmpty()) {
-                return ResponseEntity.badRequest().body(
-                    Map.of("mensaje", "No hay copias disponibles del libro con el ID proporcionado")
-                );
+            // Verificar que hay copias disponibles
+            List<Map<String, Object>> copias = inventarioClient.verificarDisponibilidad(libroId);
+            if (copias == null || copias.isEmpty()) {
+                return ResponseEntity.badRequest().body("Error: No hay copias disponibles");
             }
-        } catch (FeignException.NotFound e) {
-            return ResponseEntity.badRequest().body(
-                Map.of("mensaje", "No existe un libro con el ID proporcionado en el inventario")
-            );
+
+            // Tomar la primera copia disponible
+            Map<String, Object> copia = copias.get(0);
+            Long inventarioId = Long.valueOf(copia.get("id").toString());
+
+            // Guardar el préstamo
+            prestamo.setDevuelto(false);
+            Prestamo guardado = repo.save(prestamo);
+
+            // Actualizar estado de la copia a PRESTADO
+            Map<String, Object> actualizacion = new HashMap<>();
+            actualizacion.put("libroId", copia.get("libroId"));
+            actualizacion.put("codigoCopia", copia.get("codigoCopia"));
+            actualizacion.put("estado", "PRESTADO");
+            actualizacion.put("ubicacion", copia.get("ubicacion"));
+            inventarioClient.actualizarInventario(inventarioId, actualizacion);
+
+            return ResponseEntity.status(201).body(guardado);
+
+        } catch (FeignException e) {
+            return ResponseEntity.status(503).body("Error conectando con servicios externos: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
         }
-
-        // 3. Si todo es válido, guardar en prestamos_db
-        prestamo.setDevuelto(false);
-        Prestamo guardado = repo.save(prestamo);
-        
-        return ResponseEntity.status(201).body(
-            Map.of(
-                "mensaje", "Préstamo registrado exitosamente",
-                "prestamo", guardado
-            )
-        );
-
-    } catch (FeignException e) {
-        // Error genérico de conexión
-        return ResponseEntity.status(503).body(
-            Map.of("mensaje", "Error conectando con servicios externos. Intente más tarde.")
-        );
-
-    } catch (Exception e) {
-        // Error interno
-        return ResponseEntity.status(500).body(
-            Map.of("mensaje", "Error interno del servidor")
-        );
     }
-}
 
-    // GET: Buscar por ID
     public ResponseEntity<?> obtenerPorId(Long id) {
         Long idNoNulo = Objects.requireNonNull(id, "El id del préstamo no puede ser nulo");
-
         Prestamo prestamo = repo.findById(idNoNulo)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Préstamo no encontrado con ID: " + idNoNulo));
-        
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", "Préstamo encontrado exitosamente");
-        respuesta.put("prestamo", prestamo);
-        
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.ok(prestamo);
     }
 
-    // GET: Listar todos
     public ResponseEntity<?> listarPrestamos() {
-        List<Prestamo> prestamos = repo.findAll();
-        
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", "Lista de préstamos obtenida exitosamente");
-        respuesta.put("total", prestamos.size());
-        respuesta.put("prestamos", prestamos);
-        
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.ok(repo.findAll());
     }
 
-    // PUT: Actualizar
     public ResponseEntity<?> actualizar(Long id, Prestamo prestamo) {
         Long idNoNulo = Objects.requireNonNull(id, "El id del préstamo no puede ser nulo");
         Prestamo prestamoExistente = repo.findById(idNoNulo)
-            .orElseThrow(() -> new RecursoNoEncontradoException("Préstamo no encontrado con ID: " + idNoNulo));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Préstamo no encontrado con ID: " + idNoNulo));
+
+        boolean yaEstabaDevuelto = prestamoExistente.isDevuelto();
 
         if (prestamo.getFechaPrestamo() != null) {
             prestamoExistente.setFechaPrestamo(prestamo.getFechaPrestamo());
         }
-        if (prestamo.isDevuelto() != prestamoExistente.isDevuelto()) {
+        if (prestamo.isDevuelto() != yaEstabaDevuelto) {
             prestamoExistente.setDevuelto(prestamo.isDevuelto());
         }
 
         Prestamo actualizado = repo.save(prestamoExistente);
-        
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", "Préstamo actualizado exitosamente");
-        respuesta.put("prestamo", actualizado);
-        
-        return ResponseEntity.ok(respuesta);
+
+        // Si se está marcando como devuelto, actualizar inventario a DISPONIBLE
+        if (prestamo.isDevuelto() && !yaEstabaDevuelto) {
+            try {
+                List<Map<String, Object>> copias = inventarioClient.obtenerInventarioPorLibro(
+                        prestamoExistente.getLibroId()
+                );
+                if (copias != null && !copias.isEmpty()) {
+
+                    Map<String, Object> copia = copias.stream()
+                            .filter(c -> "PRESTADO".equals(c.get("estado")))
+                            .findFirst()
+                            .orElse(copias.get(0));
+
+                    Long inventarioId = Long.valueOf(copia.get("id").toString());
+                    Map<String, Object> actualizacion = new HashMap<>();
+                    actualizacion.put("libroId", copia.get("libroId"));
+                    actualizacion.put("codigoCopia", copia.get("codigoCopia"));
+                    actualizacion.put("estado", "DISPONIBLE");
+                    actualizacion.put("ubicacion", copia.get("ubicacion"));
+                    inventarioClient.actualizarInventario(inventarioId, actualizacion);
+                }
+            } catch (FeignException e) {
+                System.err.println("Advertencia: no se pudo actualizar el inventario: " + e.getMessage());
+            }
+        }
+
+        return ResponseEntity.ok(actualizado);
     }
 
-    // DELETE: Eliminar
     public ResponseEntity<?> eliminar(Long id) {
         Long idNoNulo = Objects.requireNonNull(id, "El id del préstamo no puede ser nulo");
         if (!repo.existsById(idNoNulo)) {
             throw new RecursoNoEncontradoException("Préstamo no encontrado con ID: " + idNoNulo);
         }
         repo.deleteById(idNoNulo);
-        
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", "Préstamo eliminado exitosamente");
-        respuesta.put("idEliminado", idNoNulo);
-        
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.ok("Préstamo eliminado exitosamente");
     }
 }
